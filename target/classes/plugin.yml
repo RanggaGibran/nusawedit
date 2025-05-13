@@ -1,0 +1,66 @@
+name: NusaWEdit
+main: id.nusawedit.Plugin
+version: 1.0-SNAPSHOT
+api-version: 1.15
+depend: [WorldGuard]
+softdepend: [SuperiorSkyblock2]
+
+commands:
+  nwe:
+    description: Main command for NusaWEdit
+    aliases: [nusawedit]
+    
+permissions:
+  nusawedit.inventory:
+    description: Allows access to virtual inventory
+    default: true
+  nusawedit.set:
+    description: Allows setting blocks
+    default: true
+  nusawedit.replace:
+    description: Allows replacing blocks
+    default: true
+  nusawedit.undo:
+    description: Allows undoing operations
+    default: true
+  nusawedit.cancel:
+    description: Allows canceling ongoing operations
+    default: true
+  nusawedit.visualize:
+    description: Allows visualization of selections
+    default: true
+  nusawedit.preview:
+    description: Allows preview of operations
+    default: true
+  nusawedit.admin:
+    description: Parent permission for all admin commands
+    default: op
+    children:
+      nusawedit.admin.reload: true
+      nusawedit.admin.give: true
+      nusawedit.admin.giveall: true
+      nusawedit.admin.bypass: true
+  nusawedit.admin.reload:
+    description: Allows reloading configuration
+    default: op
+  nusawedit.admin.give:
+    description: Allows giving selection wands
+    default: op
+  nusawedit.admin.giveall:
+    description: Allows giving selection wands to all players
+    default: op
+  nusawedit.admin.bypass:
+    description: Allows bypassing island protection
+    default: op
+  nusawedit.rank.skymason:
+    description: Rank permission for Skymason
+    default: false
+  nusawedit.rank.skyforge:
+    description: Rank permission for Skyforge
+    default: false
+  nusawedit.rank.nebula:
+    description: Rank permission for Nebula
+    default: false
+  nusawedit.rank.sovereign:
+    description: Rank permission for Sovereign
+    default: false

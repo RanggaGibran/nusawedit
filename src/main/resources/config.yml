@@ -1,0 +1,24 @@
+# NusaWEdit Configuration
+
+# Block limits per rank
+ranks:
+  Aetherian: 100
+  Skymason: 200
+  Skyforge: 300
+  Nebula: 350
+  Sovereign: 400
+
+# Blacklisted blocks that cannot be modified
+blacklisted-blocks:
+  - BEDROCK
+  - END_PORTAL_FRAME
+  - COMMAND_BLOCK
+  - BARRIER
+  - STRUCTURE_BLOCK
+  - JIGSAW
+
+# How long (in hours) before virtual inventories expire
+inventory-cleanup-hours: 24
+
+# How many minutes before expiry to warn players
+inventory-warning-minutes: 30
