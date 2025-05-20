@@ -136,6 +136,83 @@ public class BlockOperationHandler {
     }
     
     /**
+     * Set blocks in player's selection to a pattern of materials
+     * @param player Player
+     * @param pattern Pattern of materials
+     * @return true if operation was successful
+     */
+    public boolean setBlocksPattern(Player player, BlockPattern pattern) {
+        // Use async handler for large selections
+        Selection selection = plugin.getSelectionManager().getSelection(player);
+        int volume = selection != null ? selection.getVolume() : 0;
+        
+        // Use async handler for selections above a threshold 
+        if (volume > 1000) { 
+            asyncHandler.setBlocksPatternAsync(player, pattern);
+            return true; // Operation started
+        }
+        
+        // For smaller selections, use synchronous approach
+        if (!plugin.getSelectionManager().hasCompleteSelection(player)) {
+            player.sendMessage("§cYou need to make a complete selection first!");
+            return false;
+        }
+        
+        // Create undo operation
+        UndoOperation undoOp = new UndoOperation(player.getUniqueId());
+        
+        // Keep track of materials used
+        Map<Material, Integer> materialsUsed = new HashMap<>();
+        
+        // Process the blocks
+        int affected = 0;
+        for (int x = selection.getMinX(); x <= selection.getMaxX(); x++) {
+            for (int y = selection.getMinY(); y <= selection.getMaxY(); y++) {
+                for (int z = selection.getMinZ(); z <= selection.getMaxZ(); z++) {
+                    Block block = selection.getWorld().getBlockAt(x, y, z);
+                    
+                    // Skip blacklisted blocks
+                    if (plugin.getConfigManager().isBlacklisted(block.getType())) {
+                        continue;
+                    }
+                    
+                    // Store block for undo
+                    undoOp.addBlock(block.getLocation(), block.getBlockData());
+                    
+                    // Get random material from the pattern
+                    Material material = pattern.getRandomMaterial();
+                    
+                    // Change the block
+                    block.setType(material);
+                    
+                    // Count materials used
+                    materialsUsed.put(material, materialsUsed.getOrDefault(material, 0) + 1);
+                    
+                    affected++;
+                }
+            }
+        }
+        
+        // Remove materials from player's inventory
+        for (Map.Entry<Material, Integer> entry : materialsUsed.entrySet()) {
+            plugin.getInventoryManager().removeMaterial(player, entry.getKey(), entry.getValue());
+        }
+        
+        // Add undo operation to history
+        addUndoOperation(player, undoOp);
+        
+        // Notify player
+        if (pattern.size() == 1) {
+            player.sendMessage("§aSuccessfully changed §6" + affected + " blocks §ato §6" + 
+                    formatMaterial(pattern.getMaterials().get(0)) + "§a!");
+        } else {
+            player.sendMessage("§aSuccessfully changed §6" + affected + " blocks §ato mixed materials!");
+        }
+        
+        return true;
+    }
+    
+    /**
      * Replace specific blocks in player's selection with another material
      * @param player Player
      * @param fromMaterial Material to replace

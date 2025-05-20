@@ -3,10 +3,13 @@ package id.nusawedit.commands.subcommands;
 import id.nusawedit.Plugin;
 import id.nusawedit.commands.SubCommand;
 import id.nusawedit.selection.Selection;
+import id.nusawedit.operations.BlockPattern;
 
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Map;
 
 public class SetCommand implements SubCommand {
     private final Plugin plugin;
@@ -26,22 +29,23 @@ public class SetCommand implements SubCommand {
         }
         
         if (args.length < 1) {
-            player.sendMessage("§cUsage: /nwe set <material>");
+            player.sendMessage("§cUsage: /nwe set <material> or /nwe set <material1,material2...> or /nwe set <percent%material1,percent%material2...>");
+            player.sendMessage("§cExample: /nwe set stone");
+            player.sendMessage("§cExample: /nwe set stone,cobblestone");
+            player.sendMessage("§cExample: /nwe set 30%stone,50%cobblestone,20%andesite");
             return false;
         }
         
-        String materialName = args[0].toUpperCase();
-        Material material;
+        // Parse pattern
+        BlockPattern pattern = parsePattern(args[0]);
         
-        try {
-            material = Material.valueOf(materialName);
-        } catch (IllegalArgumentException e) {
-            player.sendMessage("§cInvalid material: " + materialName);
+        if (pattern.size() == 0) {
+            player.sendMessage("§cInvalid material pattern! Example: stone,cobblestone or 30%stone,50%cobblestone");
             return false;
         }
         
         // Lakukan pre-check untuk memastikan operasi bisa dilakukan
-        if (!preCheckOperation(player, material)) {
+        if (!preCheckOperation(player, pattern)) {
             return false; // Gagal pre-check, tidak perlu consume wand
         }
         
@@ -51,17 +55,62 @@ public class SetCommand implements SubCommand {
         }
         
         // Execute set operation
-        plugin.getBlockOperationHandler().setBlocks(player, material);
+        plugin.getBlockOperationHandler().setBlocksPattern(player, pattern);
         return true;
+    }
+    
+    /**
+     * Parse a pattern string into a BlockPattern
+     * @param patternStr Pattern string, e.g. "stone,cobblestone" or "30%stone,50%cobblestone"
+     * @return BlockPattern object
+     */
+    private BlockPattern parsePattern(String patternStr) {
+        BlockPattern pattern = new BlockPattern();
+        
+        // Split by comma
+        String[] parts = patternStr.split(",");
+        
+        for (String part : parts) {
+            part = part.trim();
+            
+            try {
+                // Check if it has a percentage
+                if (part.contains("%")) {
+                    // Format: 30%stone
+                    String[] percentParts = part.split("%");
+                    if (percentParts.length != 2) {
+                        continue; // Invalid format
+                    }
+                    
+                    int weight = Integer.parseInt(percentParts[0]);
+                    String materialName = percentParts[1].toUpperCase();
+                    Material material = Material.valueOf(materialName);
+                    pattern.addMaterial(material, weight);
+                } else {
+                    // No percentage, use equal weights (100 is arbitrary)
+                    String materialName = part.toUpperCase();
+                    Material material = Material.valueOf(materialName);
+                    pattern.addMaterial(material, 100);
+                }
+            } catch (NumberFormatException e) {
+                // Invalid number
+                continue;
+            } catch (IllegalArgumentException e) {
+                // Invalid material name
+                continue;
+            }
+        }
+        
+        return pattern;
     }
     
     /**
      * Melakukan pre-check untuk operasi set
      * @param player Player
-     * @param material Material untuk set
+     * @param pattern Pattern blok untuk set
      * @return true jika pre-check berhasil
      */
-    private boolean preCheckOperation(Player player, Material material) {
+    private boolean preCheckOperation(Player player, BlockPattern pattern) {
         // Check if player has a valid selection
         if (!plugin.getSelectionManager().hasCompleteSelection(player)) {
             player.sendMessage("§cYou need to make a complete selection first!");
@@ -80,10 +129,16 @@ public class SetCommand implements SubCommand {
             return false;
         }
         
-        // Check material yang cukup
-        if (!plugin.getInventoryManager().hasMaterial(player, material, volume)) {
-            player.sendMessage("§cYou don't have enough materials! You need §6" + volume + " " + formatMaterial(material) + "§c!");
-            return false;
+        // Calculate material requirements
+        Map<Material, Integer> requirements = pattern.calculateRequirements(volume);
+        
+        // Check if player has enough of each material
+        for (Map.Entry<Material, Integer> entry : requirements.entrySet()) {
+            if (!plugin.getInventoryManager().hasMaterial(player, entry.getKey(), entry.getValue())) {
+                player.sendMessage("§cYou don't have enough materials! You need approximately §6" + entry.getValue() + 
+                        " " + formatMaterial(entry.getKey()) + "§c!");
+                return false;
+            }
         }
         
         return true;

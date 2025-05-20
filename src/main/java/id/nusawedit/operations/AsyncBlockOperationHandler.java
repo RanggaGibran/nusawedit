@@ -362,6 +362,163 @@ public class AsyncBlockOperationHandler {
     }
     
     /**
+     * Set blocks in player's selection to a pattern of materials with batched processing
+     * @param player Player
+     * @param pattern Pattern of materials
+     * @return CompletableFuture that completes when operation is done
+     */
+    public CompletableFuture<Boolean> setBlocksPatternAsync(Player player, BlockPattern pattern) {
+        // Check if player has a valid selection
+        if (!plugin.getSelectionManager().hasCompleteSelection(player)) {
+            player.sendMessage("§cYou need to make a complete selection first!");
+            return CompletableFuture.completedFuture(false);
+        }
+        
+        // Check if an operation is already running
+        if (activeOperations.containsKey(player.getUniqueId())) {
+            player.sendMessage("§cYou already have an operation in progress. Use /nwe cancel to cancel it.");
+            return CompletableFuture.completedFuture(false);
+        }
+        
+        Selection selection = plugin.getSelectionManager().getSelection(player);
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        
+        // Create list of blocks to process
+        List<Location> blocksToProcess = new ArrayList<>();
+        
+        // Collect blocks to process
+        for (int x = selection.getMinX(); x <= selection.getMaxX(); x++) {
+            for (int y = selection.getMinY(); y <= selection.getMaxY(); y++) {
+                for (int z = selection.getMinZ(); z <= selection.getMaxZ(); z++) {
+                    Block block = selection.getWorld().getBlockAt(x, y, z);
+                    
+                    // Skip blacklisted blocks
+                    if (plugin.getConfigManager().isBlacklisted(block.getType())) {
+                        continue;
+                    }
+                    
+                    blocksToProcess.add(block.getLocation());
+                }
+            }
+        }
+        
+        // Check if there are blocks to process
+        if (blocksToProcess.isEmpty()) {
+            player.sendMessage("§cNo applicable blocks found in the selection!");
+            return CompletableFuture.completedFuture(false);
+        }
+        
+        int totalBlocks = blocksToProcess.size();
+        
+        // Calculate material requirements
+        Map<Material, Integer> materialEstimates = pattern.calculateRequirements(totalBlocks);
+        
+        // Check if player has enough of each material
+        for (Map.Entry<Material, Integer> entry : materialEstimates.entrySet()) {
+            if (!plugin.getInventoryManager().hasMaterial(player, entry.getKey(), entry.getValue())) {
+                player.sendMessage("§cYou don't have enough materials! You need approximately §6" + entry.getValue() + 
+                        " " + formatMaterial(entry.getKey()) + "§c!");
+                return CompletableFuture.completedFuture(false);
+            }
+        }
+        
+        // Create undo operation
+        UndoOperation undoOp = new UndoOperation(player.getUniqueId());
+        
+        // Remove materials from player's inventory before starting
+        for (Map.Entry<Material, Integer> entry : materialEstimates.entrySet()) {
+            plugin.getInventoryManager().removeMaterial(player, entry.getKey(), entry.getValue());
+        }
+        
+        // Start progress message
+        player.sendMessage("§aBeginning block operation. Please wait...");
+        player.sendMessage("§7This may take a moment for large selections.");
+        
+        // Process blocks in batches
+        processBatchedSetPatternOperation(player, blocksToProcess, pattern, undoOp, 0, totalBlocks, materialEstimates, result);
+        
+        return result;
+    }
+    
+    /**
+     * Process blocks in batches for set pattern operation
+     */
+    private void processBatchedSetPatternOperation(Player player, List<Location> blocks, BlockPattern pattern, 
+                                               UndoOperation undoOp, int processed, int total, 
+                                               Map<Material, Integer> materialEstimates, CompletableFuture<Boolean> result) {
+        
+        // Start batch processing task
+        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
+            private int currentIndex = 0;
+            private int totalProcessed = processed;
+            private final Map<Material, Integer> materialsUsed = new HashMap<>();
+            
+            @Override
+            public void run() {
+                // Process a batch of blocks
+                int batchCount = 0;
+                
+                while (currentIndex < blocks.size() && batchCount < BATCH_SIZE) {
+                    Location location = blocks.get(currentIndex);
+                    Block block = location.getBlock();
+                    
+                    // Store block for undo
+                    undoOp.addBlock(location, block.getBlockData());
+                    
+                    // Get random material from pattern
+                    Material material = pattern.getRandomMaterial();
+                    
+                    // Change the block
+                    block.setType(material);
+                    
+                    // Count the material used
+                    materialsUsed.put(material, materialsUsed.getOrDefault(material, 0) + 1);
+                    
+                    currentIndex++;
+                    totalProcessed++;
+                    batchCount++;
+                }
+                
+                // Send progress update every 10% or at the end
+                int progressPercent = (totalProcessed * 100) / total;
+                if (progressPercent % 10 == 0 || totalProcessed == total) {
+                    player.sendMessage("§7Progress: §e" + progressPercent + "% §7(§e" + totalProcessed + "§7/§e" + total + "§7 blocks)");
+                }
+                
+                // Check if we're done
+                if (currentIndex >= blocks.size()) {
+                    // Clean up and complete
+                    activeOperations.remove(player.getUniqueId());
+                    ((BukkitTask) activeOperations.get(player.getUniqueId())).cancel();
+                    
+                    // Add undo operation to history
+                    standardHandler.addUndoOperation(player, undoOp);
+                    
+                    // Return any unused materials
+                    for (Map.Entry<Material, Integer> entry : materialEstimates.entrySet()) {
+                        int returned = entry.getValue() - materialsUsed.getOrDefault(entry.getKey(), 0);
+                        if (returned > 0) {
+                            plugin.getInventoryManager().addMaterial(player, entry.getKey(), returned);
+                        }
+                    }
+                    
+                    // Complete the future
+                    if (pattern.size() == 1) {
+                        player.sendMessage("§aOperation complete! Changed §6" + total + " blocks §ato §6" + 
+                                formatMaterial(pattern.getMaterials().get(0)) + "§a!");
+                    } else {
+                        player.sendMessage("§aOperation complete! Changed §6" + total + " blocks §ato mixed materials!");
+                    }
+                    result.complete(true);
+                }
+            }
+        }, 0L, BATCH_DELAY);
+        
+        // Store the task
+        activeOperations.put(player.getUniqueId(), task);
+    }
+    
+    /**
      * Format material name for display
      * @param material Material
      * @return Formatted name
