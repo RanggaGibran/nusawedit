@@ -17,6 +17,7 @@ import id.nusawedit.listeners.WandListener;
 import id.nusawedit.handlers.SuperiorSkyblockHandler;
 import id.nusawedit.handlers.GriefPreventionHandler;
 import id.nusawedit.handlers.TownyHandler;
+import id.nusawedit.handlers.PlotSquaredHandler;
 
 import java.util.logging.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -41,6 +42,7 @@ public class Plugin extends JavaPlugin {
     private SuperiorSkyblockHandler superiorSkyblockHandler;
     private GriefPreventionHandler griefPreventionHandler;
     private TownyHandler townyHandler;
+    private PlotSquaredHandler plotSquaredHandler;
     
     @Override
     public void onLoad() {
@@ -100,6 +102,7 @@ public class Plugin extends JavaPlugin {
         superiorSkyblockHandler = new SuperiorSkyblockHandler(this);
         griefPreventionHandler = new GriefPreventionHandler(this);
         townyHandler = new TownyHandler(this);
+        plotSquaredHandler = new PlotSquaredHandler(this);
         
         // Register command handler and tab completer
         CommandHandler commandHandler = new CommandHandler(this);
@@ -187,5 +190,13 @@ public class Plugin extends JavaPlugin {
      */
     public TownyHandler getTownyHandler() {
         return townyHandler;
+    }
+    
+    /**
+     * Get the PlotSquared handler
+     * @return PlotSquaredHandler
+     */
+    public PlotSquaredHandler getPlotSquaredHandler() {
+        return plotSquaredHandler;
     }
 }

@@ -73,6 +73,12 @@ public class WandListener implements Listener {
             }
         }
         
+        // Check PlotSquared permissions
+        if (plugin.getPlotSquaredHandler().isEnabled() && !plugin.getPlotSquaredHandler().canUseWand(player, clickedBlock.getLocation())) {
+            player.sendMessage("§cAnda tidak diizinkan menggunakan tongkat NusaWEdit di plot ini!");
+            return;
+        }
+        
         // Handle different actions
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             // Set position 1
