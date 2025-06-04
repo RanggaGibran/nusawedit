@@ -35,6 +35,13 @@ public class WandListener implements Listener {
         // Cancel the event to prevent normal interaction
         event.setCancelled(true);
         
+        // Check if wand is enabled in this world
+        String worldName = player.getWorld().getName();
+        if (!plugin.getConfigManager().isFeatureEnabledInWorld(worldName, "wand-enabled")) {
+            player.sendMessage("§cSelection wands are disabled in this world!");
+            return;
+        }
+        
         // Get the clicked block
         Block clickedBlock = event.getClickedBlock();
         if (clickedBlock == null) {

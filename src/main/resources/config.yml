@@ -22,3 +22,36 @@ inventory-cleanup-hours: 24
 
 # How many minutes before expiry to warn players
 inventory-warning-minutes: 30
+
+# Async operation settings
+async:
+  # How many blocks to process per batch
+  batch-size: 500
+  # Delay between batches in ticks (1 tick = 1/20 second)
+  batch-delay: 1
+  # How often to send progress updates (in percentage)
+  progress-report-interval: 10
+
+# Per-world settings
+worlds:
+  world:
+    block-limit-multiplier: 1.0
+    features:
+      wand-enabled: true
+      set-enabled: true
+      replace-enabled: true
+      pattern-enabled: true
+  world_nether:
+    block-limit-multiplier: 0.5
+    features:
+      wand-enabled: true
+      set-enabled: true
+      replace-enabled: false
+      pattern-enabled: false
+  world_the_end:
+    block-limit-multiplier: 0.75
+    features:
+      wand-enabled: true
+      set-enabled: true
+      replace-enabled: true
+      pattern-enabled: false

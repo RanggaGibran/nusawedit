@@ -22,6 +22,13 @@ public class SetCommand implements SubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         Player player = (Player) sender;
         
+        // Check if set command is enabled in this world
+        String worldName = player.getWorld().getName();
+        if (!plugin.getConfigManager().isFeatureEnabledInWorld(worldName, "set-enabled")) {
+            player.sendMessage("§cThe set command is disabled in this world!");
+            return false;
+        }
+        
         // Check if player is holding a wand
         if (!plugin.getSelectionManager().isHoldingWand(player)) {
             player.sendMessage("§cAnda harus memegang tongkat NusaWEdit untuk menggunakan perintah ini!");

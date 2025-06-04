@@ -47,13 +47,26 @@ public class BlockOperationHandler {
         
         Selection selection = plugin.getSelectionManager().getSelection(player);
         int volume = selection.getVolume();
+        String worldName = selection.getWorld().getName();
+        
+        // Check if feature is enabled in this world
+        if (!plugin.getConfigManager().isFeatureEnabledInWorld(worldName, "set-enabled")) {
+            player.sendMessage("§cThis feature is disabled in this world!");
+            return false;
+        }
         
         // Check if player has permission for this many blocks
         String rank = getRank(player);
-        int blockLimit = plugin.getConfigManager().getRankBlockLimit(rank);
+        int blockLimit = plugin.getConfigManager().getWorldRankBlockLimit(rank, worldName);
         
         if (volume > blockLimit) {
             player.sendMessage("§cYour selection is too large! Maximum: §6" + blockLimit + " blocks§c, Selected: §6" + volume + " blocks");
+            return false;
+        }
+        
+        // Check if player has enough materials
+        if (!plugin.getInventoryManager().hasMaterial(player, material, volume)) {
+            player.sendMessage("§cYou don't have enough materials! You need §6" + volume + " " + formatMaterial(material) + "§c!");
             return false;
         }
         

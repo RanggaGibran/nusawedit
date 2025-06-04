@@ -137,4 +137,61 @@ public class ConfigManager {
     public int getInventoryWarningMinutes() {
         return config.getInt("inventory-warning-minutes", 30);
     }
+    
+    /**
+     * Get the batch size for async operations
+     * @return Batch size
+     */
+    public int getAsyncBatchSize() {
+        return config.getInt("async.batch-size", 500); // Default to 500
+    }
+
+    /**
+     * Get the batch delay for async operations
+     * @return Batch delay in ticks
+     */
+    public int getAsyncBatchDelay() {
+        return config.getInt("async.batch-delay", 1); // Default to 1 tick
+    }
+
+    /**
+     * Get how often to report progress during async operations
+     * @return Progress report interval percentage
+     */
+    public int getAsyncProgressReportInterval() {
+        return config.getInt("async.progress-report-interval", 10); // Default to 10%
+    }
+
+    /**
+     * Get block limit multiplier for a specific world
+     * @param worldName Name of the world
+     * @return Block limit multiplier, defaults to 1.0
+     */
+    public double getWorldBlockLimitMultiplier(String worldName) {
+        String path = "worlds." + worldName + ".block-limit-multiplier";
+        return config.isSet(path) ? config.getDouble(path) : 1.0;
+    }
+
+    /**
+     * Check if a feature is enabled in a specific world
+     * @param worldName Name of the world
+     * @param feature Feature name
+     * @return true if enabled, defaults to true
+     */
+    public boolean isFeatureEnabledInWorld(String worldName, String feature) {
+        String path = "worlds." + worldName + ".features." + feature;
+        return config.isSet(path) ? config.getBoolean(path) : true;
+    }
+
+    /**
+     * Get block limit for a specific rank and world
+     * @param rank Rank name
+     * @param worldName World name
+     * @return Block limit for the rank in the specified world
+     */
+    public int getWorldRankBlockLimit(String rank, String worldName) {
+        int baseLimit = getRankBlockLimit(rank);
+        double multiplier = getWorldBlockLimitMultiplier(worldName);
+        return (int) Math.ceil(baseLimit * multiplier);
+    }
 }

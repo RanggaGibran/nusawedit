@@ -138,59 +138,60 @@ public class AsyncBlockOperationHandler {
      * Process blocks in batches for set operation
      */
     private void processBatchedSetOperation(Player player, List<Location> blocks, Material material, 
-                                           UndoOperation undoOp, int processed, int total, 
-                                           CompletableFuture<Boolean> result) {
-        
-        // Start batch processing task
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
-            private int currentIndex = 0;
-            private int totalProcessed = processed;
+                                       UndoOperation undoOp, int processed, int total, 
+                                       CompletableFuture<Boolean> result) {
+    
+    final int[] currentIndex = {processed};
+    final int[] lastReportedPercentage = {0}; // Track last reported percentage
+    
+    // Start batch processing task
+    BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable() {
+        @Override
+        public void run() {
+            int batchCount = 0;
             
-            @Override
-            public void run() {
-                // Process a batch of blocks
-                int batchCount = 0;
+            // Process a batch of blocks
+            while (currentIndex[0] < blocks.size() && batchCount < BATCH_SIZE) {
+                Location loc = blocks.get(currentIndex[0]);
+                Block block = loc.getBlock();
                 
-                while (currentIndex < blocks.size() && batchCount < BATCH_SIZE) {
-                    Location location = blocks.get(currentIndex);
-                    Block block = location.getBlock();
-                    
-                    // Store block for undo
-                    undoOp.addBlock(location, block.getBlockData());
-                    
-                    // Change the block
-                    block.setType(material);
-                    
-                    currentIndex++;
-                    totalProcessed++;
-                    batchCount++;
-                }
+                // Store original block for undo
+                undoOp.addBlock(loc, block.getBlockData());
                 
-                // Send progress update every 10% or at the end
-                int progressPercent = (totalProcessed * 100) / total;
-                if (progressPercent % 10 == 0 || totalProcessed == total) {
-                    player.sendMessage("§7Progress: §e" + progressPercent + "% §7(§e" + totalProcessed + "§7/§e" + total + "§7 blocks)");
-                }
+                // Set the new block
+                block.setType(material, false); // false = don't apply physics
                 
-                // Check if we're done
-                if (currentIndex >= blocks.size()) {
-                    // Clean up and complete
-                    activeOperations.remove(player.getUniqueId());
-                    ((BukkitTask) activeOperations.get(player.getUniqueId())).cancel();
-                    
-                    // Add undo operation to history
-                    standardHandler.addUndoOperation(player, undoOp);
-                    
-                    // Complete the future
-                    player.sendMessage("§aOperation complete! Changed §6" + total + " blocks §ato §6" + formatMaterial(material) + "§a!");
-                    result.complete(true);
-                }
+                currentIndex[0]++;
+                batchCount++;
             }
-        }, 0L, BATCH_DELAY);
-        
-        // Store the task
-        activeOperations.put(player.getUniqueId(), task);
-    }
+            
+            // Report progress at specified intervals
+            int currentPercentage = (int) ((double) currentIndex[0] / total * 100);
+            if (currentPercentage - lastReportedPercentage[0] >= 5) {
+                player.sendMessage("§aOperation in progress: §6" + currentPercentage + "% §acomplete");
+                lastReportedPercentage[0] = currentPercentage;
+            }
+            
+            // Check if done
+            if (currentIndex[0] >= blocks.size()) {
+                // Cancel task
+                Bukkit.getScheduler().cancelTask(activeOperations.remove(player.getUniqueId()).getTaskId());
+                
+                // Add undo operation to history
+                standardHandler.addUndoOperation(player, undoOp);
+                
+                // Notify player
+                player.sendMessage("§aSuccessfully changed §6" + total + " blocks §ato §6" + formatMaterial(material) + "§a!");
+                
+                // Complete future
+                result.complete(true);
+            }
+        }
+    }, 0L, BATCH_DELAY);
+    
+    // Store the task
+    activeOperations.put(player.getUniqueId(), task);
+}
     
     /**
      * Replace blocks in player's selection asynchronously
