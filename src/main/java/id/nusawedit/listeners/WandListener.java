@@ -38,7 +38,7 @@ public class WandListener implements Listener {
         // Check if wand is enabled in this world
         String worldName = player.getWorld().getName();
         if (!plugin.getConfigManager().isFeatureEnabledInWorld(worldName, "wand-enabled")) {
-            player.sendMessage("§cSelection wands are disabled in this world!");
+            player.sendMessage(plugin.getMessageManager().getMessage("protection.wand-disabled-world"));
             return;
         }
         
@@ -48,26 +48,26 @@ public class WandListener implements Listener {
             return;
         }
         
-        // Check WorldGuard permissions - prevent usage in protected regions
+        // Check WorldGuard permissions
         if (plugin.getWorldGuardHandler().isEnabled()) {
             if (!plugin.getWorldGuardHandler().canUseWand(player, clickedBlock.getLocation())) {
-                player.sendMessage("§cAnda tidak diizinkan menggunakan tongkat NusaWEdit di region ini!");
+                player.sendMessage(plugin.getMessageManager().getMessage("protection.wand-worldguard-denied"));
                 return;
             }
         }
         
-        // Check SuperiorSkyblock permissions - prevent usage on other islands
+        // Check SuperiorSkyblock permissions
         if (plugin.getSuperiorSkyblockHandler().isEnabled()) {
             if (!plugin.getSuperiorSkyblockHandler().canUseWand(player, clickedBlock.getLocation())) {
-                player.sendMessage("§cAnda tidak diizinkan menggunakan tongkat NusaWEdit di island orang lain!");
+                player.sendMessage(plugin.getMessageManager().getMessage("protection.wand-island-denied"));
                 return;
             }
         }
         
-        // Check GriefPrevention permissions - prevent usage in others' claims
+        // Check GriefPrevention permissions
         if (plugin.getGriefPreventionHandler().isEnabled()) {
             if (!plugin.getGriefPreventionHandler().canUseWand(player, clickedBlock.getLocation())) {
-                player.sendMessage("§cAnda tidak diizinkan menggunakan tongkat NusaWEdit di claim orang lain!");
+                player.sendMessage(plugin.getMessageManager().getMessage("protection.wand-claim-denied"));
                 return;
             }
         }
@@ -75,14 +75,14 @@ public class WandListener implements Listener {
         // Check Towny permissions
         if (plugin.getTownyHandler().isEnabled()) {
             if (!plugin.getTownyHandler().canUseWand(player, clickedBlock.getLocation())) {
-                player.sendMessage("§cAnda tidak diizinkan menggunakan tongkat NusaWEdit di area town ini!");
+                player.sendMessage(plugin.getMessageManager().getMessage("protection.wand-town-denied"));
                 return;
             }
         }
         
         // Check PlotSquared permissions
         if (plugin.getPlotSquaredHandler().isEnabled() && !plugin.getPlotSquaredHandler().canUseWand(player, clickedBlock.getLocation())) {
-            player.sendMessage("§cAnda tidak diizinkan menggunakan tongkat NusaWEdit di plot ini!");
+            player.sendMessage(plugin.getMessageManager().getMessage("protection.wand-plot-denied"));
             return;
         }
         

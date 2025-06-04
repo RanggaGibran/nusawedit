@@ -49,7 +49,7 @@ public class AsyncBlockOperationHandler {
         BukkitTask task = activeOperations.remove(playerId);
         if (task != null) {
             task.cancel();
-            player.sendMessage("§cAll pending operations canceled.");
+            player.sendMessage(plugin.getMessageManager().getMessage("cancel.all-cancelled"));
         }
     }
     
@@ -71,7 +71,7 @@ public class AsyncBlockOperationHandler {
     public CompletableFuture<Boolean> setBlocksAsync(Player player, Material material) {
         // Check for existing operations
         if (hasActiveOperation(player)) {
-            player.sendMessage("§cYou already have an operation in progress. Please wait or use /nwe cancel.");
+            player.sendMessage(plugin.getMessageManager().getMessage("async.operation-in-progress"));
             return CompletableFuture.completedFuture(false);
         }
         
@@ -107,14 +107,15 @@ public class AsyncBlockOperationHandler {
         
         // Check if there are blocks to process
         if (blocksToProcess.isEmpty()) {
-            player.sendMessage("§cNo applicable blocks found in the selection!");
+            player.sendMessage(plugin.getMessageManager().getMessage("operations.no-applicable-blocks"));
             return CompletableFuture.completedFuture(false);
         }
         
         // Check if player has enough materials
         int totalBlocks = blocksToProcess.size();
         if (!plugin.getInventoryManager().hasMaterial(player, material, totalBlocks)) {
-            player.sendMessage("§cYou don't have enough materials! You need §6" + totalBlocks + " " + formatMaterial(material) + "§c!");
+            player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+                "operations.not-enough-materials", totalBlocks, formatMaterial(material)));
             return CompletableFuture.completedFuture(false);
         }
         
@@ -125,8 +126,8 @@ public class AsyncBlockOperationHandler {
         plugin.getInventoryManager().removeMaterial(player, material, totalBlocks);
         
         // Start progress message
-        player.sendMessage("§aBeginning block operation. Please wait...");
-        player.sendMessage("§7This may take a moment for large selections.");
+        player.sendMessage(plugin.getMessageManager().getMessage("async.operation-starting"));
+        player.sendMessage(plugin.getMessageManager().getMessage("async.operation-may-take-time"));
         
         // Process blocks in batches
         processBatchedSetOperation(player, blocksToProcess, material, undoOp, 0, totalBlocks, result);
@@ -168,7 +169,8 @@ public class AsyncBlockOperationHandler {
             // Report progress at specified intervals
             int currentPercentage = (int) ((double) currentIndex[0] / total * 100);
             if (currentPercentage - lastReportedPercentage[0] >= 5) {
-                player.sendMessage("§aOperation in progress: §6" + currentPercentage + "% §acomplete");
+                player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+                    "async.operation-progress", currentPercentage));
                 lastReportedPercentage[0] = currentPercentage;
             }
             
@@ -181,7 +183,8 @@ public class AsyncBlockOperationHandler {
                 standardHandler.addUndoOperation(player, undoOp);
                 
                 // Notify player
-                player.sendMessage("§aSuccessfully changed §6" + total + " blocks §ato §6" + formatMaterial(material) + "§a!");
+                player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+                    "operations.set-success", total, formatMaterial(material)));
                 
                 // Complete future
                 result.complete(true);
@@ -432,8 +435,8 @@ public class AsyncBlockOperationHandler {
         }
         
         // Start progress message
-        player.sendMessage("§aBeginning block operation. Please wait...");
-        player.sendMessage("§7This may take a moment for large selections.");
+        player.sendMessage(plugin.getMessageManager().getMessage("async.operation-starting"));
+        player.sendMessage(plugin.getMessageManager().getMessage("async.operation-may-take-time"));
         
         // Process blocks in batches
         processBatchedSetPatternOperation(player, blocksToProcess, pattern, undoOp, 0, totalBlocks, materialEstimates, result);

@@ -1,0 +1,104 @@
+# NusaWEdit Messages Configuration
+# Use & for color codes (e.g. &a, &b, &c)
+
+general:
+  no-permission: "&cYou don't have permission to use this command!"
+  player-only: "&cThis command can only be used by players!"
+  unknown-command: "&cUnknown subcommand: {0}"
+  help-header: "&e&l===== NusaWEdit Help ====="
+  help-format: "&6/nwe {0}&f - {1}"
+  reload-success: "&aNusaWEdit configuration reloaded!"
+
+selection:
+  position-1-set: "&aFirst position set at &6{0}"
+  position-2-set: "&aSecond position set at &6{0}"
+  selection-complete: "&aSelection complete! Volume: &6{0} blocks"
+  wand-depleted: "&cTongkat Anda kehabisan penggunaan!"
+  wand-received: "&aYou received a NusaWEdit wand with &6{0} uses&a!"
+  wand-required: "&cAnda harus memegang tongkat NusaWEdit untuk menggunakan perintah ini!"
+
+protection:
+  wand-disabled-world: "&cSelection wands are disabled in this world!"
+  wand-worldguard-denied: "&cAnda tidak diizinkan menggunakan tongkat NusaWEdit di region ini!"
+  wand-island-denied: "&cAnda tidak diizinkan menggunakan tongkat NusaWEdit di island orang lain!"
+  wand-claim-denied: "&cAnda tidak diizinkan menggunakan tongkat NusaWEdit di claim orang lain!"
+  wand-town-denied: "&cAnda tidak diizinkan menggunakan tongkat NusaWEdit di area town ini!"
+  wand-plot-denied: "&cAnda tidak diizinkan menggunakan tongkat NusaWEdit di plot ini!"
+  feature-disabled-world: "&cThis feature is disabled in this world!"
+
+operations:
+  no-selection: "&cYou need to make a complete selection first!"
+  selection-too-large: "&cYour selection is too large! Maximum: &6{0} blocks&c, Selected: &6{1} blocks"
+  not-enough-materials: "&cYou don't have enough materials! You need &6{0} {1}&c!"
+  set-success: "&aSuccessfully changed &6{0} blocks &ato &6{1}&a!"
+  set-mixed-success: "&aSuccessfully changed &6{0} blocks &ato mixed materials!"
+  replace-success: "&aSuccessfully replaced &6{0} {1} &awith &6{2}&a!"
+  no-blocks-found: "&cNo blocks of type &6{0} &cfound in the selection!"
+  no-applicable-blocks: "&cNo applicable blocks found in the selection!"
+
+async:
+  operation-in-progress: "&cYou already have an operation in progress. Please wait or use /nwe cancel."
+  operation-starting: "&aBeginning block operation. Please wait..."
+  operation-may-take-time: "&7This may take a moment for large selections."
+  operation-progress: "&aOperation in progress: &6{0}% &acomplete"
+  operation-replace-starting: "&aBeginning replace operation. Please wait..."
+  operation-progress-detailed: "&7Progress: &e{0}% &7(&e{1}&7/&e{2}&7 blocks)"
+
+undo:
+  no-operations: "&cNo operations to undo!"
+  success: "&aSuccessfully undid the last operation! (&6{0} blocks&a)"
+
+cancel:
+  no-operations: "&cYou don't have any active operations to cancel."
+  success: "&aActive operations have been cancelled."
+  all-cancelled: "&cAll pending operations canceled."
+
+inventory:
+  opened: "&aOpened your NusaWEdit virtual inventory!"
+  expiry-warning: "&c&lWarning: &eYour NusaWEdit virtual inventory will expire in &c{0} minutes&e!"
+  expired: "&c&lYour NusaWEdit virtual inventory has expired!"
+
+visualize:
+  enabled: "&aSelection visualization enabled!"
+  disabled: "&cSelection visualization disabled!"
+
+preview:
+  started-set: "&aPreview started: &6Set {0} blocks to {1}"
+  started-replace: "&aPreview started: &6Replace {0} {1} blocks with {2}"
+  active: "&aActive preview: &6{0}{1}"
+  affected-blocks: "&aAffected blocks: &6{0}"
+  usage-execute: "&aUse &6/nwe preview confirm &ato execute or &6/nwe preview cancel &ato cancel."
+  warning-materials: "&c&lWarning: &eYou don't have enough materials! You need &6{0} {1}&e!"
+  cancelled: "&aPreview cancelled."
+  no-active-preview: "&cNo active preview to cancel."
+  executed: "&aOperation executed!"
+  execution-failed: "&cFailed to execute operation. No active preview or insufficient materials."
+  creation-failed: "&cCouldn't create preview. Do you have a valid selection?"
+
+admin:
+  give-success: "&aGave wand with &6{0} uses &ato &6{1}&a!"
+  giveall-success: "&aGave wands with &6{0} uses &ato &6{1}&a players!"
+  no-players-online: "&cNo players online to give wands to!"
+  player-not-found: "&cPlayer not found: {0}"
+  invalid-item-type: "&cInvalid item type. Only 'wand' is supported."
+  invalid-uses-number: "&cInvalid number of uses: {0}"
+  uses-must-be-positive: "&cUses must be a positive number!"
+
+usage:
+  set: "&cUsage: /nwe set <material> or /nwe set <material1,material2...> or /nwe set <percent%material1,percent%material2...>"
+  set-example-1: "&cExample: /nwe set stone"
+  set-example-2: "&cExample: /nwe set stone,cobblestone"
+  set-example-3: "&cExample: /nwe set 30%stone,50%cobblestone,20%andesite"
+  replace: "&cUsage: /nwe replace <from_material> <to_material>"
+  preview: "&cUsage: /nwe preview <set/replace/cancel/confirm>"
+  preview-example-1: "&cExample: /nwe preview set STONE"
+  preview-example-2: "&cExample: /nwe preview replace DIRT STONE"
+  preview-set: "&cUsage: /nwe preview set <material>"
+  preview-replace: "&cUsage: /nwe preview replace <from_material> <to_material>"
+  give: "&cUsage: /nwe give <player> wand <uses>"
+  giveall: "&cUsage: /nwe giveall wand <uses>"
+
+errors:
+  invalid-material: "&cInvalid material: {0}"
+  invalid-pattern: "&cInvalid material pattern! Example: stone,cobblestone or 30%stone,50%cobblestone"
+  unknown-preview-action: "&cUnknown preview action: {0}"

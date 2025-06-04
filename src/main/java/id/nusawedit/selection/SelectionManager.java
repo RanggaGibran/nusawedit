@@ -70,7 +70,7 @@ public class SelectionManager {
     public void setFirstPosition(Player player, Location location) {
         Selection selection = getSelection(player);
         selection.setPos1(location);
-        player.sendMessage("§aFirst position set at §6" + formatLocation(location));
+        player.sendMessage(plugin.getMessageManager().getFormattedMessage("selection.position-1-set", formatLocation(location)));
     }
     
     /**
@@ -81,11 +81,11 @@ public class SelectionManager {
     public void setSecondPosition(Player player, Location location) {
         Selection selection = getSelection(player);
         selection.setPos2(location);
-        player.sendMessage("§aSecond position set at §6" + formatLocation(location));
+        player.sendMessage(plugin.getMessageManager().getFormattedMessage("selection.position-2-set", formatLocation(location)));
         
         // If selection is now complete, show volume info
         if (selection.isComplete()) {
-            player.sendMessage("§aSelection complete! Volume: §6" + selection.getVolume() + " blocks");
+            player.sendMessage(plugin.getMessageManager().getFormattedMessage("selection.selection-complete", selection.getVolume()));
         }
     }
     
@@ -189,7 +189,7 @@ public class SelectionManager {
                 // Remove depleted wand
                 player.getInventory().setItemInMainHand(null);
                 player.playSound(player.getLocation(), "entity.item.break", 1.0f, 1.0f);
-                player.sendMessage("§cTongkat Anda kehabisan penggunaan!");
+                player.sendMessage(plugin.getMessageManager().getMessage("selection.wand-depleted"));
             }
             return success;
         }
@@ -201,7 +201,7 @@ public class SelectionManager {
                 // Remove depleted wand
                 player.getInventory().setItemInOffHand(null);
                 player.playSound(player.getLocation(), "entity.item.break", 1.0f, 1.0f);
-                player.sendMessage("§cTongkat Anda kehabisan penggunaan!");
+                player.sendMessage(plugin.getMessageManager().getMessage("selection.wand-depleted"));
             }
             return success;
         }

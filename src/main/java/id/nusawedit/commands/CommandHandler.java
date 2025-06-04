@@ -50,20 +50,18 @@ public class CommandHandler implements CommandExecutor {
         SubCommand subcommand = subcommands.get(subcommandName);
         
         if (subcommand == null) {
-            sender.sendMessage("§cUnknown subcommand: " + subcommandName);
+            sender.sendMessage(plugin.getMessageManager().getFormattedMessage("general.unknown-command", subcommandName));
             showHelp(sender);
             return true;
         }
         
-        // Check if command is player-only
         if (subcommand.isPlayerOnly() && !(sender instanceof Player)) {
-            sender.sendMessage("§cThis command can only be used by players!");
+            sender.sendMessage(plugin.getMessageManager().getMessage("general.player-only"));
             return true;
         }
         
-        // Check permissions
         if (!subcommand.hasPermission(sender)) {
-            sender.sendMessage("§cYou don't have permission to use this command!");
+            sender.sendMessage(plugin.getMessageManager().getMessage("general.no-permission"));
             return true;
         }
         
@@ -75,13 +73,14 @@ public class CommandHandler implements CommandExecutor {
     }
     
     private void showHelp(CommandSender sender) {
-        sender.sendMessage("§e§l===== NusaWEdit Help =====");
+        sender.sendMessage(plugin.getMessageManager().getMessage("general.help-header"));
         
         // For players, show commands they have permission to use
         for (Map.Entry<String, SubCommand> entry : subcommands.entrySet()) {
             SubCommand subcommand = entry.getValue();
             if (subcommand.hasPermission(sender)) {
-                sender.sendMessage("§6/" + "nwe " + entry.getKey() + "§f - " + subcommand.getDescription());
+                sender.sendMessage(plugin.getMessageManager().getFormattedMessage(
+                    "general.help-format", entry.getKey(), subcommand.getDescription()));
             }
         }
     }

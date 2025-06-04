@@ -67,7 +67,8 @@ public class VirtualInventoryManager {
                 Player player = Bukkit.getPlayer(playerId);
                 if (player != null && player.isOnline()) {
                     long minutesLeft = (expiryTime - System.currentTimeMillis()) / (60 * 1000);
-                    player.sendMessage("§c§lWarning: §eYour NusaWEdit virtual inventory will expire in §c" + minutesLeft + " minutes§e!");
+                    player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+    "inventory.expiry-warning", minutesLeft));
                 }
             }
         }
@@ -88,7 +89,7 @@ public class VirtualInventoryManager {
                 // Notify player if online
                 Player player = Bukkit.getPlayer(playerId);
                 if (player != null && player.isOnline()) {
-                    player.sendMessage("§c§lYour NusaWEdit virtual inventory has expired!");
+                    player.sendMessage(plugin.getMessageManager().getMessage("inventory.expired"));
                 }
                 
                 return true; // Remove from map
@@ -114,6 +115,7 @@ public class VirtualInventoryManager {
         
         // Open the inventory
         player.openInventory(virtualInv.getInventory());
+        player.sendMessage(plugin.getMessageManager().getMessage("inventory.opened"));
     }
     
     /**

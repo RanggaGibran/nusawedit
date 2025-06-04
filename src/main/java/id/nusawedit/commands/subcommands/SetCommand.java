@@ -25,21 +25,21 @@ public class SetCommand implements SubCommand {
         // Check if set command is enabled in this world
         String worldName = player.getWorld().getName();
         if (!plugin.getConfigManager().isFeatureEnabledInWorld(worldName, "set-enabled")) {
-            player.sendMessage("§cThe set command is disabled in this world!");
+            player.sendMessage(plugin.getMessageManager().getMessage("protection.feature-disabled-world"));
             return false;
         }
         
         // Check if player is holding a wand
         if (!plugin.getSelectionManager().isHoldingWand(player)) {
-            player.sendMessage("§cAnda harus memegang tongkat NusaWEdit untuk menggunakan perintah ini!");
+            player.sendMessage(plugin.getMessageManager().getMessage("selection.wand-required"));
             return false;
         }
         
         if (args.length < 1) {
-            player.sendMessage("§cUsage: /nwe set <material> or /nwe set <material1,material2...> or /nwe set <percent%material1,percent%material2...>");
-            player.sendMessage("§cExample: /nwe set stone");
-            player.sendMessage("§cExample: /nwe set stone,cobblestone");
-            player.sendMessage("§cExample: /nwe set 30%stone,50%cobblestone,20%andesite");
+            player.sendMessage(plugin.getMessageManager().getMessage("usage.set"));
+            player.sendMessage(plugin.getMessageManager().getMessage("usage.set-example-1"));
+            player.sendMessage(plugin.getMessageManager().getMessage("usage.set-example-2"));
+            player.sendMessage(plugin.getMessageManager().getMessage("usage.set-example-3"));
             return false;
         }
         

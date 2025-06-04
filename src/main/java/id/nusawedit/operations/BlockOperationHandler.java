@@ -41,7 +41,7 @@ public class BlockOperationHandler {
     public boolean canPerformOperation(Player player, Material material) {
         // Check if player has a valid selection
         if (!plugin.getSelectionManager().hasCompleteSelection(player)) {
-            player.sendMessage("§cYou need to make a complete selection first!");
+            player.sendMessage(plugin.getMessageManager().getMessage("operations.no-selection"));
             return false;
         }
         
@@ -51,7 +51,7 @@ public class BlockOperationHandler {
         
         // Check if feature is enabled in this world
         if (!plugin.getConfigManager().isFeatureEnabledInWorld(worldName, "set-enabled")) {
-            player.sendMessage("§cThis feature is disabled in this world!");
+            player.sendMessage(plugin.getMessageManager().getMessage("protection.feature-disabled-world"));
             return false;
         }
         
@@ -60,13 +60,15 @@ public class BlockOperationHandler {
         int blockLimit = plugin.getConfigManager().getWorldRankBlockLimit(rank, worldName);
         
         if (volume > blockLimit) {
-            player.sendMessage("§cYour selection is too large! Maximum: §6" + blockLimit + " blocks§c, Selected: §6" + volume + " blocks");
+            player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+                "operations.selection-too-large", blockLimit, volume));
             return false;
         }
         
         // Check if player has enough materials
         if (!plugin.getInventoryManager().hasMaterial(player, material, volume)) {
-            player.sendMessage("§cYou don't have enough materials! You need §6" + volume + " " + formatMaterial(material) + "§c!");
+            player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+                "operations.not-enough-materials", volume, formatMaterial(material)));
             return false;
         }
         
@@ -144,7 +146,8 @@ public class BlockOperationHandler {
         addUndoOperation(player, undoOp);
         
         // Notify player
-        player.sendMessage("§aSuccessfully changed §6" + affected + " blocks §ato §6" + formatMaterial(material) + "§a!");
+        player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+            "operations.set-success", affected, formatMaterial(material)));
         return true;
     }
     
@@ -216,10 +219,11 @@ public class BlockOperationHandler {
         
         // Notify player
         if (pattern.size() == 1) {
-            player.sendMessage("§aSuccessfully changed §6" + affected + " blocks §ato §6" + 
-                    formatMaterial(pattern.getMaterials().get(0)) + "§a!");
+            player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+                "operations.set-success", affected, formatMaterial(pattern.getMaterials().get(0))));
         } else {
-            player.sendMessage("§aSuccessfully changed §6" + affected + " blocks §ato mixed materials!");
+            player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+                "operations.set-mixed-success", affected));
         }
         
         return true;
@@ -310,8 +314,8 @@ public class BlockOperationHandler {
         addUndoOperation(player, undoOp);
         
         // Notify player
-        player.sendMessage("§aSuccessfully replaced §6" + affected + " " + formatMaterial(fromMaterial) + 
-                " §awith §6" + formatMaterial(toMaterial) + "§a!");
+        player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+            "operations.replace-success", affected, formatMaterial(fromMaterial), formatMaterial(toMaterial)));
         return true;
     }
     
@@ -330,7 +334,7 @@ public class BlockOperationHandler {
         Stack<UndoOperation> history = undoHistory.get(player.getUniqueId());
         
         if (history == null || history.isEmpty()) {
-            player.sendMessage("§cNo operations to undo!");
+            player.sendMessage(plugin.getMessageManager().getMessage("undo.no-operations"));
             return false;
         }
         
@@ -358,7 +362,8 @@ public class BlockOperationHandler {
             plugin.getInventoryManager().addMaterial(player, entry.getKey(), entry.getValue());
         }
         
-        player.sendMessage("§aSuccessfully undid the last operation! (§6" + undoOp.getBlocks().size() + " blocks§a)");
+        player.sendMessage(plugin.getMessageManager().getFormattedMessage(
+            "undo.success", undoOp.getBlocks().size()));
         return true;
     }
     

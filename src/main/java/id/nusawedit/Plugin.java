@@ -18,6 +18,7 @@ import id.nusawedit.handlers.SuperiorSkyblockHandler;
 import id.nusawedit.handlers.GriefPreventionHandler;
 import id.nusawedit.handlers.TownyHandler;
 import id.nusawedit.handlers.PlotSquaredHandler;
+import id.nusawedit.config.MessageManager;
 
 import java.util.logging.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -43,6 +44,7 @@ public class Plugin extends JavaPlugin {
     private GriefPreventionHandler griefPreventionHandler;
     private TownyHandler townyHandler;
     private PlotSquaredHandler plotSquaredHandler;
+    private MessageManager messageManager; // Add this field to the Plugin class
     
     @Override
     public void onLoad() {
@@ -103,6 +105,7 @@ public class Plugin extends JavaPlugin {
         griefPreventionHandler = new GriefPreventionHandler(this);
         townyHandler = new TownyHandler(this);
         plotSquaredHandler = new PlotSquaredHandler(this);
+        messageManager = new MessageManager(this); // Initialize in onEnable() after configManager
         
         // Register command handler and tab completer
         CommandHandler commandHandler = new CommandHandler(this);
@@ -199,6 +202,14 @@ public class Plugin extends JavaPlugin {
     public PlotSquaredHandler getPlotSquaredHandler() {
         return plotSquaredHandler;
     }
+    
+    /**
+     * Get the message manager
+     * @return MessageManager
+     */
+    public MessageManager getMessageManager() {
+        return messageManager;
+    }
 
     /**
      * Reload the plugin configuration and reinitialize handlers
@@ -206,6 +217,7 @@ public class Plugin extends JavaPlugin {
     public void reload() {
         // Reload configuration
         configManager.reloadConfig();
+        messageManager.reloadMessages();
         
         // Reinitialize handlers
         worldGuardHandler = new WorldGuardHandler(this);

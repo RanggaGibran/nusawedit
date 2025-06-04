@@ -19,16 +19,16 @@ public class VisualizeCommand implements SubCommand {
         
         // Check if player is holding a wand (optional, but consistent)
         if (!plugin.getSelectionManager().isHoldingWand(player)) {
-            player.sendMessage("§cAnda harus memegang tongkat NusaWEdit untuk menggunakan perintah ini!");
+            player.sendMessage(plugin.getMessageManager().getMessage("selection.wand-required"));
             return false;
         }
         
         boolean enabled = plugin.getVisualizationManager().toggleVisualization(player);
         
         if (enabled) {
-            player.sendMessage("§aSelection visualization enabled!");
+            player.sendMessage(plugin.getMessageManager().getMessage("visualize.enabled"));
         } else {
-            player.sendMessage("§cSelection visualization disabled!");
+            player.sendMessage(plugin.getMessageManager().getMessage("visualize.disabled"));
         }
         
         return true;
