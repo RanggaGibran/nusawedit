@@ -199,4 +199,32 @@ public class Plugin extends JavaPlugin {
     public PlotSquaredHandler getPlotSquaredHandler() {
         return plotSquaredHandler;
     }
+
+    /**
+     * Reload the plugin configuration and reinitialize handlers
+     */
+    public void reload() {
+        // Reload configuration
+        configManager.reloadConfig();
+        
+        // Reinitialize handlers
+        worldGuardHandler = new WorldGuardHandler(this);
+        superiorSkyblockHandler = new SuperiorSkyblockHandler(this);
+        griefPreventionHandler = new GriefPreventionHandler(this);
+        townyHandler = new TownyHandler(this);
+        plotSquaredHandler = new PlotSquaredHandler(this);
+        
+        // Restart tasks
+        if (inventoryManager != null) {
+            inventoryManager.stopTasks();
+            inventoryManager.startCleanupTask();
+        }
+        
+        if (visualizationManager != null) {
+            visualizationManager.shutdown();
+            visualizationManager = new VisualizationManager(this);
+        }
+        
+        // Additional manager reloads as needed
+    }
 }

@@ -14,7 +14,7 @@ public class ReloadCommand implements SubCommand {
     
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        plugin.getConfigManager().reloadConfig();
+        plugin.reload();
         sender.sendMessage("§aNusaWEdit configuration reloaded!");
         return true;
     }

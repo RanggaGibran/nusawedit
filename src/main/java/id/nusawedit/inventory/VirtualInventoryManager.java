@@ -279,4 +279,16 @@ public class VirtualInventoryManager {
         warningTask.cancel();
         saveInventories();
     }
+
+    /**
+     * Stop the inventory cleanup and warning tasks
+     */
+    public void stopTasks() {
+        if (cleanupTask != null) {
+            cleanupTask.cancel();
+        }
+        if (warningTask != null) {
+            warningTask.cancel();
+        }
+    }
 }
